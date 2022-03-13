@@ -1,35 +1,31 @@
 const express = require("express");
 const logger = require("morgan");
 const cors = require("cors");
-const mongoose = require("mongoose");
+const typeorm = require("typeorm");
 const indexRouter = require("./routes/index");
 const usersRouter = require("./routes/users");
 const routeNotFoundJsonHandler = require("./services/routeNotFoundJsonHandler");
 const jsonErrorHandler = require("./services/jsonErrorHandler");
 
-mongoose.connect(process.env.MONGO_DB_URL, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-  useCreateIndex: true,
-});
+typeorm.createConnection().then(() => {
+  const app = express();
 
-const app = express();
+  app.use(logger("dev"));
+  app.use(cors());
+  app.use(express.json());
+  app.use(express.urlencoded({ extended: false }));
 
-app.use(logger("dev"));
-app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+  // Register routes
+  app.use("/", indexRouter);
+  app.use("/users", usersRouter);
 
-// Register routes
-app.use("/", indexRouter);
-app.use("/users", usersRouter);
+  // Register 404 middleware and error handler
+  app.use(routeNotFoundJsonHandler); // this middleware must be registered after all routes to handle 404 correctly
+  app.use(jsonErrorHandler); // this error handler must be registered after all middlewares to catch all errors
 
-// Register 404 middleware and error handler
-app.use(routeNotFoundJsonHandler); // this middleware must be registered after all routes to handle 404 correctly
-app.use(jsonErrorHandler); // this error handler must be registered after all middlewares to catch all errors
+  const port = parseInt(process.env.PORT || "8000");
 
-const port = parseInt(process.env.PORT || "3000");
-
-app.listen(port, () => {
-  console.log(`Server listening at http://localhost:${port}`);
+  app.listen(port, () => {
+    console.log(`Server listening at http://localhost:${port}`);
+  });
 });

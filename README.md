@@ -1,4 +1,4 @@
-# centrale-ei-web
+# ensta-in211-web
 
 ## Backend
 
@@ -56,4 +56,4 @@ npm run lint
 
 ### Customize configuration
 
-See [Configuration Reference](https://cli.vuejs.org/config/).
+See [Configuration Reference](https://create-react-app.dev/docs/advanced-configuration/).

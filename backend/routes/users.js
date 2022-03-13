@@ -1,28 +1,32 @@
 const express = require("express");
-const UserModel = require("../models/user");
+const { getRepository, getConnection } = require("typeorm");
+const User = require("../entities/user");
 const router = express.Router();
 
 router.get("/", function (req, res) {
-  UserModel.find({}).then(function (users) {
-    res.json({ users: users });
-  });
+  getRepository(User)
+    .find({})
+    .then(function (users) {
+      res.json({ users: users });
+    });
 });
 
 router.post("/new", function (req, res) {
-  const newUser = new UserModel({
+  const userRepository = getRepository(User);
+  const newUser = userRepository.create({
     email: req.body.email,
-    firstName: req.body.firstName,
-    lastName: req.body.lastName,
+    firstname: req.body.firstname,
+    lastname: req.body.lastname,
   });
 
-  newUser
-    .save()
+  userRepository
+    .insert(newUser)
     .then(function (newDocument) {
       res.status(201).json(newDocument);
     })
     .catch(function (error) {
       console.error(error);
-      if (error.code === 11000) {
+      if (error.code === "23505") {
         res.status(400).json({
           message: `User with email "${newUser.email}" already exists`,
         });
@@ -33,7 +37,8 @@ router.post("/new", function (req, res) {
 });
 
 router.delete("/:userId", function (req, res) {
-  UserModel.deleteOne({ _id: req.params.userId })
+  getRepository(User)
+    .delete({ id: req.params.userId })
     .then(function () {
       res.status(204).json({ message: "User successfully deleted" });
     })
