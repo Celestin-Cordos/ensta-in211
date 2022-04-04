@@ -15,6 +15,10 @@ const Movie = new typeorm.EntitySchema({
       type: "timestamptz",
       unique: false,
     },
+    poster_path: {
+      type: String,
+      unique: false,
+    },
   },
 });
 
